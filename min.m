@@ -1,4 +1,3 @@
-
 clc; clear; close all;
 
 
@@ -32,7 +31,7 @@ supply_constraints = optimconstr(numCenters);
 
 for j = 1:numCenters
     % Correctly indexing within the bounds of center_capacity
-    supply_constraints(j) = sum(supply .* x1(:, j)) <= center_capacity(j);
+    supply_constraints(j) = sum(x1(:, j)) == center_capacity(j);
 end
 
 % showconstr(supply_constraints)
@@ -46,7 +45,7 @@ prob.Constraints.supply_constraints = supply_constraints;
 demand_constraints = optimconstr(25);
 
 for k = 1:25
-    demand_constraints(k) = sum(x2(:, k)) >= demand(k);
+    demand_constraints(k) = sum(x2(:, k)) == demand(k);
 end
 
 % showconstr(demand_constraints)
@@ -59,7 +58,7 @@ prob.Constraints.demand_constraints = demand_constraints;
 
 farmer_constraints = optimconstr(20);
 for i = 1:20
-    farmer_constraints(i) = sum(x1(i, :)) <= supply(i);
+    farmer_constraints(i) = sum(x1(i, :)) == supply(i);
 end
 
 % showconstr(farmer_constraints)
@@ -75,7 +74,8 @@ numCenters = numel(center_capacity);
 capacity_constraints = optimconstr(numCenters);
 for j = 1:numCenters
     % Define the constraint that each economic center's capacity must be greater than zero
-    capacity_constraints(j) = sum(x2(j, :)) <= center_capacity(j);
+    % capacity_constraints(j) = sum(x2(j, :)) <= center_capacity(j);
+    capacity_constraints(j) = sum(x2(j, :)) == sum(x1(:, j));
 end
 
 % showconstr(capacity_constraints)
@@ -85,7 +85,7 @@ prob.Constraints.capacity_constraints = capacity_constraints;
 
 %% Objective Function: Minimize the Cost (Cost = Distance)
 
-cost =  sum(sum(farmers_to_centers .* x1)) + sum(sum(centers_to_districts' .* x2)) -1000*sum(sum( x1));
+cost =  sum(sum(farmers_to_centers .* x1)) + sum(sum(centers_to_districts' .* x2)); %-1000*sum(sum( x1));
 
 prob.Objective = cost;
 
@@ -97,5 +97,3 @@ options = optimoptions('linprog', 'MaxTime', 28800);
 disp('Optimal Distribution Plan:');
 disp(sol);
 disp(['Minimum Cost: ', num2str(fval)]);
-%disp(sol.x1);
-%disp(sol.x2);
